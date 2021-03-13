@@ -81,7 +81,16 @@ public class AuthController {
 
     @PatchMapping(value = "/users/{id}/makeadmin")
     public ResponseEntity<ResponseModel> makeUserAdmin(@PathVariable Long id) throws Exception {
-        return new ResponseEntity<>(authService.makeUserAdmin(id), HttpStatus.OK);
+        ResponseModel responseModel = authService.makeUserAdmin(id);
+        HttpStatus httpStatus;
+        if (responseModel.getStatus().equals(ResponseModel.SUCCESS_STATUS)) {
+            httpStatus = HttpStatus.OK;
+        } else if (responseModel.getMessage().equals(String.format("User #%d Not Found", id))) {
+            httpStatus = HttpStatus.NOT_FOUND;
+        } else {
+            httpStatus = HttpStatus.BAD_GATEWAY;
+        }
+        return new ResponseEntity<>(responseModel, httpStatus);
     }
 
     @GetMapping(value = "/user/check")

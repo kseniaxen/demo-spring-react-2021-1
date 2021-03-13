@@ -100,11 +100,19 @@ public class AuthService implements IAuthService {
     }
 
     public ResponseModel deleteUser(Long id) {
-        userDao.deleteById(id);
-        return ResponseModel.builder()
-                .status(ResponseModel.SUCCESS_STATUS)
-                .message(String.format("User #%d Deleted", id))
-                .build();
+        Optional<User> userOptional = userDao.findById(id);
+        if (userOptional.isPresent()) {
+            userDao.deleteById(id);
+            return ResponseModel.builder()
+                    .status(ResponseModel.SUCCESS_STATUS)
+                    .message(String.format("User #%d Deleted", id))
+                    .build();
+        }else{
+            return ResponseModel.builder()
+                    .status(ResponseModel.FAIL_STATUS)
+                    .message(String.format("No Users: User #%d Not Found", id))
+                    .build();
+        }
     }
 
     public ResponseModel makeUserAdmin(Long id) throws Exception {

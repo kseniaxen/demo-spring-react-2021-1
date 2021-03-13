@@ -14,9 +14,9 @@ import org.tyaa.demo.java.springboot.brokershop.repositories.UserDao;
 public class BrokerShopApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(BrokerShopApplication.class, args);
+		SpringApplication.run(BrokerShopApplication.class);
 	}
-
+	/*
 	@Bean
 	public CommandLineRunner initData(
 			RoleDao roleDao,
@@ -57,4 +57,6 @@ public class BrokerShopApplication {
 			);
 		};
 	}
+
+	 */
 }
