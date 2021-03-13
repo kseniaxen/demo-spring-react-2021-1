@@ -76,7 +76,16 @@ public class AuthController {
 
     @DeleteMapping(value = "/users/{id}")
     public ResponseEntity<ResponseModel> deleteUser(@PathVariable Long id) {
-        return new ResponseEntity<>(authService.deleteUser(id), HttpStatus.NO_CONTENT);
+        ResponseModel responseModel = authService.deleteUser(id);
+        HttpStatus httpStatus;
+        if (responseModel.getStatus().equals(ResponseModel.SUCCESS_STATUS)) {
+            httpStatus = HttpStatus.OK;
+        } else if (responseModel.getMessage().equals(String.format("No Users: User #%d Not Found", id))) {
+            httpStatus = HttpStatus.NOT_FOUND;
+        } else {
+            httpStatus = HttpStatus.BAD_GATEWAY;
+        }
+        return new ResponseEntity<>(responseModel, httpStatus);
     }
 
     @PatchMapping(value = "/users/{id}/makeadmin")
