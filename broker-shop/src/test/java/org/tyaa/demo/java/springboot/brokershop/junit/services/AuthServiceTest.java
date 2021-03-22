@@ -10,6 +10,8 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.tyaa.demo.java.springboot.brokershop.entities.Role;
+import org.tyaa.demo.java.springboot.brokershop.entities.User;
+import org.tyaa.demo.java.springboot.brokershop.models.CategoryModel;
 import org.tyaa.demo.java.springboot.brokershop.models.ResponseModel;
 import org.tyaa.demo.java.springboot.brokershop.models.RoleModel;
 import org.tyaa.demo.java.springboot.brokershop.models.UserModel;
@@ -21,8 +23,9 @@ import org.tyaa.demo.java.springboot.brokershop.services.interfaces.IAuthService
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,6 +51,11 @@ public class AuthServiceTest {
     ArgumentCaptor<Role> roleArgument =
             ArgumentCaptor.forClass(Role.class);
     ArgumentCaptor<Long> roleIdArgument =
+            ArgumentCaptor.forClass(Long.class);
+    // Заглушка на основе класса сущности User
+    ArgumentCaptor<User> userArgument =
+            ArgumentCaptor.forClass(User.class);
+    ArgumentCaptor<Long> userIdArgument =
             ArgumentCaptor.forClass(Long.class);
     // Тест-кейс, который:
     // 1. обучает интерфейсный макет службы - какой объект должен возвращать ее метод getAllRoles;
@@ -153,4 +161,69 @@ public class AuthServiceTest {
                 .findById(roleIdArgument.capture());
 
     }
+
+    @Test
+    void givenAuthServiceWhenGreateUserMethodThenReturnSuccessResponseModel(){
+        final UserModel userModel =
+                UserModel.builder()
+                        .name("User1")
+                        .password("Pas1")
+                        .roleId(1L)
+                        .roleName("ROLE_USER")
+                        .build();
+        ResponseModel responseModel =
+                authService.createUser(userModel);
+        assertNotNull(responseModel);
+        assertEquals(ResponseModel.SUCCESS_STATUS, responseModel.getStatus());
+        verify(userDao, atLeast(1))
+                .save(userArgument.capture());
+        verify(userDao, atMost(1))
+                .save(userArgument.capture());
+    }
+
+    @Test
+    void givenAuthServiceWhenDeleteUserMethodThenReturnSuccessResponseModel(){
+        ResponseModel responseModel =
+                authService.deleteUser(1L);
+        assertNotNull(responseModel);
+        verify(userDao, atLeast(1))
+                .findById(userIdArgument.capture());
+        verify(userDao, atMost(1))
+                .findById(userIdArgument.capture());
+    }
+
+    @Test
+    void givenAuthServiceMockAndTooLongUserPasswordWhenCallCreateMethodThenThrowIllegalArgumentException () {
+        // строка недопустимой длины
+        final String tooLongUserPassword =
+                "password 1234567890 1234567890";
+        // модель, содержащая эту строку
+        final UserModel tooLongPasswordUserModel =
+                UserModel.builder().name("Name1").password(tooLongUserPassword).build();
+        // обучение макета службы, созданного из интерйейса:
+        // дано: когда будет вызван метод create службы,
+        // и ему будет передан аргумент со строкой недопустимой длины -
+        given(authServiceMock.createUser(tooLongPasswordUserModel))
+                .willThrow(new IllegalArgumentException()); // нужно выбросить исключение IllegalArgumentException
+        // проверка
+        try {
+            // модель, содержащая ту же слишком длинную строку
+            final UserModel userModel =
+                    UserModel.builder().name("Name1").password(tooLongUserPassword).build();
+            // попытка выполнить на модели метод с аргументом,
+            // который должен вызвать исключение
+            authServiceMock.createUser(userModel);
+            // если исключение не выброшено -
+            // объявляем данный тест-кейс не пройденным
+            // с выводом сообщения о причине
+            fail("Should throw an IllegalArgumentException");
+        } catch (IllegalArgumentException ex) { }
+        // после проверяем, был ли хотя бы один раз вызван метод save
+        // с каким-либо аргументом (универсальная заглушка)
+        // на объекте categoryDAO
+        then(userDao)
+                .should(never())
+                .save(userArgument.capture());
+    }
+
 }

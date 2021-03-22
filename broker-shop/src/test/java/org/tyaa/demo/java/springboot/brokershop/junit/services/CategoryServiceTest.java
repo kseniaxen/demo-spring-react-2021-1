@@ -49,6 +49,8 @@ public class CategoryServiceTest {
     // метод save репозитория категорий
     ArgumentCaptor<Category> categoryArgument =
             ArgumentCaptor.forClass(Category.class);
+    ArgumentCaptor<Long> categoryIdArgument =
+            ArgumentCaptor.forClass(Long.class);
 
     /* @BeforeAll
     static void setup() {
@@ -189,5 +191,39 @@ public class CategoryServiceTest {
                 String.format("Category %s Created", categoryModel.getName().trim()),
                 SystemOutResource.outContent.toString().trim()
         );
+    }
+    @Test
+    void givenCategoryModelWhenCallUpdateMethodThenReturnSuccessResponseModel () {
+        final CategoryModel categoryModel =
+                CategoryModel.builder()
+                        .name("test category 1")
+                        .build();
+        ResponseModel responseModel =
+                categoryService.update(categoryModel);
+        // Проверка, что результат не равен null
+        assertNotNull(responseModel);
+        // Проверка, что результат содержит положительный статус-код
+        assertEquals(ResponseModel.SUCCESS_STATUS, responseModel.getStatus());
+        // Проверка, что в результате вызванного выше метода тестируемой службы (create)
+        // ровно один раз был вызван метод save репозитория categoryDao.
+        // При этом на уровне тест-кейса неизвестно, какой именно аргумент
+        // получил метод save репозитория при его каскадном вызове методом create службы,
+        // поэтому в область аргумента передается объект-заглушка -
+        // заменитель реального определенного аргумента
+        verify(categoryDao, atLeastOnce())
+                .save(categoryArgument.capture());
+        verify(categoryDao, atMostOnce())
+                .save(categoryArgument.capture());
+    }
+
+    @Test
+    void givenCategoryModelWhenCallDeleteMethodThenReturnSuccessResponseModel(){
+        ResponseModel responseModel =
+                categoryService.delete(1L);
+        assertNotNull(responseModel);
+        verify(categoryDao, atLeast(1))
+                .findById(categoryIdArgument.capture());
+        verify(categoryDao, atMost(1))
+                .findById(categoryIdArgument.capture());
     }
 }
