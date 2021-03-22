@@ -57,7 +57,8 @@ public class AuthServiceTest {
     // (создается тестровщиком на основе интерфейса еще не реализованной службы -
     // как задание для разработчика реализовать методы службы в конкретном классе)
     @Test
-    void shouldGetAllRolesReturnSuccessfully () {
+    void givenAuthServiceMockWhenGetRolesMethodThenReturnSuccessResponseModel(){
+    //void shouldGetAllRolesReturnSuccessfully () {
         // Обучаем макет:
         // вернуть что? - результат, равный ...
         doReturn(
@@ -86,7 +87,8 @@ public class AuthServiceTest {
     // причем толко один раз
     // (создается разработчиком, когда тестируемый класс службы уже реализован)
     @Test
-    void shouldCreateRoleReturnSuccessfully() {
+    void givenAuthServiceWhenGreateRoleMethodThenReturnSuccessResponseModel(){
+    //void shouldCreateRoleReturnSuccessfully() {
         final RoleModel roleModel =
                 RoleModel.builder()
                         .name("ROLE_DEMO")
@@ -108,7 +110,8 @@ public class AuthServiceTest {
     }
 
     @Test
-    void shouldAuthServiceMockGetRoleUsersSuccessfully() {
+    void givenAuthServiceMockWhenGetRoleUsersMethodThenReturnSuccessResponseModel(){
+    //void shouldAuthServiceMockGetRoleUsersSuccessfully() {
         // учение макета: при вызове метода getRoleUsers
         // с аргументом 1
         // должна возвращаться модель успешного отклика
@@ -134,7 +137,8 @@ public class AuthServiceTest {
     }
 
     @Test
-    void shouldAuthServiceGetRoleUsersSuccessfully() {
+    void givenAuthServiceWhenGetRoleUsersMethodThenReturnSuccessResponseModel(){
+    //void shouldAuthServiceGetRoleUsersSuccessfully() {
         // вызов метода getRoleUsers на макете с передачей ему аргумента 1
         ResponseModel responseModel =
                 authService.getRoleUsers(1L);
